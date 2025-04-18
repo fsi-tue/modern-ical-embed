@@ -548,15 +548,12 @@ if (ical) {
 	icals = ical.split("|");
 
 	async function fetchAllLinks(urls) {
-		try {
-			const responses = await Promise.all(urls.map(url => fetch(url)));
-			const data = await Promise.all(responses.map(res => res.text()));
-			return data;
-		} catch (error) {
-			console.error(e);
-			loading.innerHTML = "Error: iCal URL doesn't exist or isn't valid<br><br>iCal links (like those from Google calendar) will need to use a cors proxy";
-			return [];
-		}
+		const results = [];
+		await Promise.allSettled(urls.map(async (url, i) => {
+			try { const r = await fetch(url); results[i] = r.ok ? await r.text() : null } catch {}
+		}));
+		if (!results.some(Boolean)) loading.innerHTML = "Error: iCal URL doesn't exist or isn't valid<br><br>iCal links (like those from Google calendar) will need to use a cors proxy";
+		return results.filter(Boolean);
 	}
 
 	fetchAllLinks(icals).then(data => {
