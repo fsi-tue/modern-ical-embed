@@ -184,6 +184,7 @@ function renderAgenda(events) {
 	for (let i = 0; i < (events.length < AGENDA_DAYS ? events.length : AGENDA_DAYS); i++) {
 		let tomorrow = new Date(today.valueOf());
 		tomorrow.setDate(tomorrow.getDate() + 1);
+		/*
 		if (events[i].startDate > tomorrow && !todayHasEvents) {
 			todayHasEvents = true;
 			row = document.createElement('tr');
@@ -197,6 +198,7 @@ function renderAgenda(events) {
 			row.appendChild(column);
 			days.push(row);
 		}
+		*/
 		if (prevDay != events[i].startDate.toDateString()) {
 			prevDay = events[i].startDate.toDateString();
 			row = document.createElement('tr');
@@ -454,6 +456,7 @@ function renderCalendar(meta, events) {
 	}
 
 	// Date
+	/*
 	let date_label = document.getElementById('date_label');
 	let date_input = document.getElementById('date');
 	document.querySelector('#date_label span').innerHTML = `${DAYS_OF_WEEK[selectedDay.getDay()]}, ${MONTHS[selectedDay.getMonth()]} ${selectedDay.getDate()}`;
@@ -464,6 +467,7 @@ function renderCalendar(meta, events) {
 	if (show_date == 0) {
 		date_label.style.display = 'none';
 	}
+	*/
 
 	// Remove nav element
 	if (show_title == 0 && show_nav == 0 && show_date == 0 && show_view == 0) {
