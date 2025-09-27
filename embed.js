@@ -146,7 +146,7 @@ function eventDetails(event) {
 		eDetails.appendChild(where);
 	}
 
-	if (event.description != '') {
+	if (event.description != null && event.description != '') {
 		eDetails.appendChild(document.createElement('br'));
 		let descLabel = document.createElement('strong');
 		descLabel.appendChild(document.createTextNode('Details: '));
@@ -155,6 +155,17 @@ function eventDetails(event) {
 		desc.innerHTML = urlify(event.description);
 		eDetails.appendChild(descLabel);
 		eDetails.appendChild(desc);
+	}
+
+	/* display a button for the event url */
+	if (event.url != null && event.url != '' && event.url.startsWith('http')) {
+		eDetails.appendChild(document.createElement('br'));
+		link = document.createElement('a');
+		link.href = event.url;
+		link.target = '_blank';
+		link.className = 'link';
+		link.appendChild(document.createTextNode("Mehr Informationen"));
+		eDetails.appendChild(link);
 	}
 
 	return eDetails;
@@ -504,11 +515,17 @@ function parseCalendar(data) {
 	for (let i = 0; i < eventData.length; i++) {
 		let event = new ICAL.Event(eventData[i]);
 		let duration = event.endDate.subtractDate(event.startDate);
+		/* the ICAL.Event Item Model has no access to the url property:
+		 * https://kewisch.github.io/ical.js/api/ICAL.Event.html
+		 * so we have to use the Component Model for this
+		 */
+		eventUrl = eventData[i].getFirstPropertyValue("url");
 		events.push({
 			uid: event.uid,
 			name: event.summary,
 			location: event.location || "TBA",
 			description: event.description,
+			url: eventUrl || "",
 			startDate: event.startDate.toJSDate(),
 			endDate: event.endDate.toJSDate(),
 			allDay: event.startDate.isDate,
