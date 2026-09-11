@@ -110,18 +110,26 @@ function eventDetails(event) {
 	eDetails.className = 'details';
 
 	let whenLabel = document.createElement('strong');
-	whenLabel.appendChild(document.createTextNode('Uhrzeit: '));
+	whenLabel.appendChild(document.createTextNode('Zeitpunkt: '));
 	let when = document.createElement('span');
 	when.className = 'when';
+	// event with start time AND end time on same day (default case)
 	let whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${event.startDate.getDate()}. ${MONTHS[event.startDate.getMonth()]}, ${startTime} - ${endTime} Uhr`;
+	if (startTime == endTime) {
+		// no end time set (fallback is endtime = starttime)
+		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${event.startDate.getDate()}. ${MONTHS[event.startDate.getMonth()]}, ${startTime} Uhr`;
+	}
 	if (event.days == 1 && event.allDay) {
-		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${MONTHS[event.startDate.getMonth()]} ${event.startDate.getDate()}, ${event.startDate.getFullYear()}`;
+		// full day event (no start or end time)
+		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${event.startDate.getDate()}. ${MONTHS[event.startDate.getMonth()]} (ganzt\u{E4}gig)`;
 	} else if (event.days % 1 == 0 && event.allDay) {
+		// multi day events with full day
 		let newEnd = new Date(event.endDate.valueOf());
 		newEnd.setDate(newEnd.getDate()-1);
-		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${event.startDate.getDate()}. ${MONTHS[event.startDate.getMonth()]} - ${DAYS_OF_WEEK[event.endDate.getDay()]}, ${event.endDate.getDate()}. ${MONTHS[event.endDate.getMonth()]} ${event.startDate.getFullYear()}`;
+		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${event.startDate.getDate()}. ${MONTHS[event.startDate.getMonth()]} - ${DAYS_OF_WEEK[event.endDate.getDay()]}, ${event.endDate.getDate()}. ${MONTHS[event.endDate.getMonth()]}`;
 	} else if (event.days > 1) {
-		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${event.startDate.getDate()}. ${MONTHS[event.startDate.getMonth()]}, ${startTime} Uhr - ${DAYS_OF_WEEK[event.endDate.getDay()]}, ${event.endDate.getDate()}. ${MONTHS[event.endDate.getMonth()]}, ${endTime} Uhr  ${event.startDate.getFullYear()}`; 
+		// multi day events
+		whenText = `${DAYS_OF_WEEK[event.startDate.getDay()]}, ${event.startDate.getDate()}. ${MONTHS[event.startDate.getMonth()]}, ${startTime} Uhr - ${DAYS_OF_WEEK[event.endDate.getDay()]}, ${event.endDate.getDate()}. ${MONTHS[event.endDate.getMonth()]}, ${endTime} Uhr`; 
 	}
 
 	when.appendChild(document.createTextNode(whenText));
@@ -267,25 +275,34 @@ function renderAgenda(events) {
 		let endM = "";
 
 		if (!events[i].allDay) {
+			// no full day events
 			let eTime = document.createElement('span');
 			eTime.className = 'time';
-			let timeText = `${startTime} ${startM == endM ? '' : startM} - ${endTime} ${endM}` + " Uhr";
+			let timeText = `${startTime} ${startM == endM ? '' : startM} - ${endTime} ${endM}` + "Uhr";
 			if (events[i].days === 0) {
-				timeText = `${startTime} ${startM}`;
+				// single day with only start time set
+				timeText = "ab " + `${startTime} ${startM}` + "Uhr";
 			} else if (events[i].days > 1 && !events[i].allDay) {
-				timeText = `${DAYS_OF_WEEK[events[i].startDate.getDay()]}, ${events[i].startDate.getDate()}. ${MONTHS[events[i].startDate.getMonth()]} - \n${DAYS_OF_WEEK[events[i].endDate.getDay()]}, ${events[i].endDate.getDate()}. ${MONTHS[events[i].endDate.getMonth()]}`;
-			} else if (events[i].days > 1 && !events[i].allDay) {
-				timeText = `${DAYS_OF_WEEK[events[i].startDate.getDay()]}, ${events[i].startDate.getDate()}. ${MONTHS[events[i].startDate.getMonth()]} - \n${DAYS_OF_WEEK[events[i].endDate.getDay()]}, ${events[i].endDate.getDate()}. ${MONTHS[events[i].endDate.getMonth()]}`;
-			}
+				// multi day with start and end time
+				timeText = `${events[i].startDate.getDate()}. ${MONTHS[events[i].startDate.getMonth()]} - ${events[i].endDate.getDate()}. ${MONTHS[events[i].endDate.getMonth()]}`;
+			} 
 			eTime.appendChild(document.createTextNode(timeText));
 	                summary.appendChild(eTime);
 
 		} else if (events[i].days > 1 && events[i].allDay){
+			// multi day full day events
 			let eTime = document.createElement('span');
                         eTime.className = 'time';
-			timeText = `${DAYS_OF_WEEK[events[i].startDate.getDay()]}, ${events[i].startDate.getDate()}. ${MONTHS[events[i].startDate.getMonth()]} - \n${DAYS_OF_WEEK[events[i].endDate.getDay()]}, ${events[i].endDate.getDate()}. ${MONTHS[events[i].endDate.getMonth()]}`;
+			timeText = `${events[i].startDate.getDate()}. ${MONTHS[events[i].startDate.getMonth()]} - ${events[i].endDate.getDate()}. ${MONTHS[events[i].endDate.getMonth()]}`;
 			eTime.appendChild(document.createTextNode(timeText));
 	                summary.appendChild(eTime);
+		} else if (events[i].allDay) {
+			// one full day
+			let eTime = document.createElement('span');
+                        eTime.className = 'time';
+			timeText = "ganzt\u{E4}gig";
+			eTime.appendChild(document.createTextNode(timeText));
+			summary.appendChild(eTime);
 		}
 		
 		event.appendChild(summary);
